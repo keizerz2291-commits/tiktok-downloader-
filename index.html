@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Downloader Tanpa Watermark</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 90%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #fe2c55;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #e0244c;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        .download-btn {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>TikTok Downloader</h2>
+    <p style="color: #666; font-size: 14px;">Unduh video tanpa watermark</p>
+    
+    <input type="text" id="tiktokUrl" placeholder="Tempel tautan video TikTok di sini...">
+    <button onclick="downloadVideo()">Proses Video</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    async function downloadVideo() {
+        const urlInput = document.getElementById('tiktokUrl').value;
+        const resultDiv = document.getElementById('result');
+
+        if (!urlInput) {
+            alert("Silakan masukkan tautan video TikTok terlebih dahulu!");
+            return;
+        }
+
+        resultDiv.innerHTML = '<p style="color: #666; font-style: italic;">Sedang memproses... Mohon tunggu.</p>';
+
+        // Menggunakan endpoint dan opsi header dari kode Anda
+        const baseUrl = "https://tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com/rich_response/index";
+        const apiUrl = `${baseUrl}?url=${encodeURIComponent(urlInput)}`;
+
+        const options = {
+            method: 'GET',
+            headers: {
+                'x-rapidapi-key': 'ce09ab381fmshf1b9a3823b64d60p157c5bjsnec80044562c5', // API Key Anda
+                'x-rapidapi-host': 'tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com',
+                'Content-Type': 'application/json'
+            }
+        };
+
+        try {
+            const response = await fetch(apiUrl, options);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP Error! Status: ${response.status}`);
+            }
+
+            // Mengubah ke .json() agar datanya bisa kita olah dengan mudah
+            const result = await response.json();
+            console.log("Respon API:", result); 
+
+            /* PENTING: Kita perlu mencari di mana letak URL video tanpa watermark 
+               di dalam objek 'result' tersebut. Berdasarkan jenis API ini, 
+               biasanya strukturnya ada di result.data.play atau result.data.video[0] atau sejenisnya.
+               Di bawah ini adalah tebakan otomatis mencari tautan URL yang valid.
+            */
+            let videoUrl = "";
+            if (result.data && result.data.play) {
+                videoUrl = result.data.play; // Struktur umum API TikTok Downloader
+            } else if (result.video) {
+                videoUrl = result.video;
+            } else if (result.url) {
+                videoUrl = result.url;
+            }
+
+            if (videoUrl) {
+                resultDiv.innerHTML = `
+                    <p style="color: green; font-weight: bold;">Video Berhasil Ditemukan!</p>
+                    <a href="${videoUrl}" target="_blank" class="download-btn" download="video_tiktok.mp4">Klik di Sini untuk Mengunduh</a>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <p style="color: orange;">Gagal otomatis ekstrak video, tapi data berhasil diterima. Silakan cek F12 -> Console untuk melihat strukturnya.</p>
+                `;
+            }
+
+        } catch (error) {
+            resultDiv.innerHTML = `<p style="color: red; font-weight: bold;">Terjadi Kesalahan: ${error.message}</p>`;
+            console.error(error);
+        }
+    }
+</script>
+
+</body>
+</html>
